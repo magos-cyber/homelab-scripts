@@ -1,0 +1,15 @@
+# Monitoring Stack
+# Usage: cd monitoring && docker compose up -d
+
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:latest
+    container_name: uptime-kuma
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ./config/uptime-kuma:/app/data
+    ports:
+      - 3001:3001

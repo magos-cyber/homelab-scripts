@@ -1,0 +1,49 @@
+# Media Server Stack
+# Usage: cd media && docker compose up -d
+
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Athens
+    volumes:
+      - ./config:/config
+      - /mnt/media:/media
+    ports:
+      - 8096:8096
+    devices:
+      - /dev/dri:/dev/dri # Intel QuickSync hardware acceleration (optional)
+
+  radarr:
+    image: linuxserver/radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Athens
+    volumes:
+      - ./config/radarr:/config
+      - /mnt/downloads:/downloads
+      - /mnt/media:/media
+    ports:
+      - 7878:7878
+
+  sonarr:
+    image: linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Athens
+    volumes:
+      - ./config/sonarr:/config
+      - /mnt/downloads:/downloads
+      - /mnt/media:/media
+    ports:
+      - 8989:8989
