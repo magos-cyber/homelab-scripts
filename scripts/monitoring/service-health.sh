@@ -12,22 +12,22 @@ echo "Date: $(date)"
 echo ""
 
 for service in $SERVICES; do
-    if systemctl is-active --quiet "$service" 2>/dev/null; then
-        echo "[OK] $service: running"
-    else
-        echo "[FAIL] $service: NOT running"
-        FAILED=$((FAILED + 1))
-        
-        # Try to restart
-        echo "  Attempting restart..."
-        sudo systemctl restart "$service" 2>/dev/null && echo "  [OK] Restarted" || echo "  [FAIL] Restart failed"
-    fi
+ if systemctl is-active --quiet "$service" 2>/dev/null; then
+ echo " $service: running"
+ else
+ echo " $service: NOT running"
+ FAILED=$((FAILED + 1))
+ 
+ # Try to restart
+ echo " Attempting restart..."
+ sudo systemctl restart "$service" 2>/dev/null && echo " Restarted" || echo " Restart failed"
+ fi
 done
 
 echo ""
 if [ $FAILED -eq 0 ]; then
-    echo "All services healthy"
+ echo "All services healthy"
 else
-    echo "$FAILED service(s) had issues"
+ echo "$FAILED service(s) had issues"
 fi
 exit $FAILED
