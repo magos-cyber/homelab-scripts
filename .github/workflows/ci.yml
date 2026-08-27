@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint & Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Shellcheck bash scripts
+        run: |
+          find scripts -name "*.sh" -type f -exec shellcheck {} \;
+
+      - name: Validate YAML syntax
+        run: |
+          find . -name "*.yml" -o -name "*.yaml" | grep -v ".github" | while read f; do
+            python3 -c "import yaml,sys; yaml.safe_load(open('$f'))" || exit 1
+          done
+
+      - name: Check Python syntax
+        run: |
+          find scripts -name "*.py" -type f -exec python3 -m py_compile {} \;
+
+      - name: Verify scripts are executable
+        run: |
+          find scripts -name "*.sh" -type f | while read f; do
+            if [ ! -x "$f" ]; then
+              echo "ERROR: $f is not executable"
+              exit 1
+            fi
+          done
+
+  test:
+    name: Test Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test disk-monitor.py imports
+        run: |
+          python3 -c "import ast; ast.parse(open('scripts/python/disk-monitor.py').read())"
+
+      - name: Test port-scanner.py imports
+        run: |
+          python3 -c "import ast; ast.parse(open('scripts/python/port-scanner.py').read())"
+
+      - name: Docker Compose validation
+        run: |
+          for f in $(find docker-compose -name "docker-compose.yml"); do
+            docker compose -f "$f" config >/dev/null 2>&1 && echo "✓ $f valid" || (echo "✗ $f invalid"; exit 1)
+          done
