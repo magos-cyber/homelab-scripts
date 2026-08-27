@@ -19,7 +19,7 @@ homelab-scripts/
 │   ├── templates/      # LXC cloud-init templates
 │   └── backup/         # Backup automation scripts
 ├── configs/            # nginx / systemd / security (coming soon)
-├── .github/workflows/  # CI: shellcheck, yamllint, py-compile, compose validate
+├── .github/workflows/  # CI: shellcheck, yamllint, py-compile, compose validate (requires PAT with workflow scope)
 └── docs/               # Documentation
 ```
 
@@ -60,7 +60,13 @@ chmod +x scripts/bash/*.sh scripts/python/*.py proxmox/backup/*.sh
 
 ## ✅ CI
 
-Every push/PR runs `.github/workflows/ci.yml`: shellcheck, YAML validation, Python `py_compile`, and `docker compose config` on every stack.
+The repository includes a GitHub Actions workflow at `.github/workflows/ci.yml` that runs on push and PR to main. It performs:
+- Shellcheck on all bash scripts
+- YAML validation on all compose files
+- Python `py_compile` on all Python scripts
+- `docker compose config` on every stack to ensure they are valid
+
+**Note:** To enable this workflow, you need a Personal Access Token with the `workflow` scope. If your PAT does not have this scope, the workflow will not be created/updateable. You can still use all other features of the repo.
 
 ## 🤝 Contributing
 
