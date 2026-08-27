@@ -2,35 +2,35 @@
 
 Complete toolkit for homelabing — best-practice scripts, Docker Compose stacks, Proxmox/LXC automation & service configurations. All content is in English to reach the global self-hosting community.
 
-## [FOLDER] Structure
+## Structure
 
 ```
 homelab-scripts/
 +-- scripts/
-|   +-- bash/           # Bash automation (server setup, docker, vpn, backup, security)
-|   +-- python/         # Python utilities (disk monitor, port scanner)
-|   `-- monitoring/     # Monitoring & alerting (temp alert)
+| +-- bash/ # Bash automation (server setup, docker, vpn, backup, security)
+| +-- python/ # Python utilities (disk monitor, port scanner)
+| `-- monitoring/ # Monitoring & alerting (temp alert)
 +-- docker-compose/
-|   +-- media/          # Jellyfin, *arr, Immich, Navidrome
-|   +-- monitoring/     # Prometheus, Grafana, Uptime Kuma, cAdvisor, node-exporter
-|   +-- network/        # Pi-hole, Traefik, AdGuard+Unbound
-|   +-- utils/          # Portainer, Vaultwarden, Homer, Watchtower, Dozzle, IT-Tools, Stirling PDF
-|   +-- home-assistant/ # Home Assistant + Mosquitto MQTT
-|   +-- productivity/   # Nextcloud, Paperless-ngx, Gitea
-|   +-- auth/           # Authentik identity server
-|   `-- databases/      # MariaDB, PostgreSQL, Redis shared stack
+| +-- media/ # Jellyfin, *arr, Immich, Navidrome
+| +-- monitoring/ # Prometheus, Grafana, Uptime Kuma, cAdvisor, node-exporter
+| +-- network/ # Pi-hole, Traefik, AdGuard+Unbound
+| +-- utils/ # Portainer, Vaultwarden, Homer, Watchtower, Dozzle, IT-Tools, Stirling PDF
+| +-- home-assistant/ # Home Assistant + Mosquitto MQTT
+| +-- productivity/ # Nextcloud, Paperless-ngx, Gitea
+| +-- auth/ # Authentik identity server
+| `-- databases/ # MariaDB, PostgreSQL, Redis shared stack
 +-- proxmox/
-|   +-- templates/      # LXC cloud-init templates
-|   `-- backup/         # Backup automation scripts
+| +-- templates/ # LXC cloud-init templates
+| `-- backup/ # Backup automation scripts
 +-- configs/
-|   +-- nginx/          # Reverse proxy examples
-|   +-- systemd/        # Service files & timers (auto-update)
-|   `-- security/       # Baseline hardening scripts
-+-- .github/workflows/  # CI: shellcheck, yamllint, py-compile, compose validate
-`-- docs/               # Documentation
+| +-- nginx/ # Reverse proxy examples
+| +-- systemd/ # Service files & timers (auto-update)
+| `-- security/ # Baseline hardening scripts
++-- .github/workflows/ # CI: shellcheck, yamllint, py-compile, compose validate
+`-- docs/ # Documentation
 ```
 
-## [ROCKET] Quick Start
+## Quick Start
 
 ```bash
 # Clone the repo
@@ -41,7 +41,7 @@ cd homelab-scripts
 chmod +x scripts/bash/*.sh scripts/python/*.py proxmox/backup/*.sh
 ```
 
-## [MEMO] Contents
+## Contents
 
 ### Bash Scripts
 - `scripts/bash/server-setup.sh` — Harden a fresh Debian/Ubuntu server (UFW, fail2ban, SSH, auto-updates)
@@ -94,7 +94,7 @@ chmod +x scripts/bash/*.sh scripts/python/*.py proxmox/backup/*.sh
 - `configs/systemd/homelab-auto-update.service` — Systemd service to run the auto-update script
 - `configs/systemd/homelab-auto-update.timer` — Timer to trigger the service daily at 04:00
 
-## [OK] CI
+## CI
 
 The repository includes a GitHub Actions workflow at `.github/workflows/ci.yml` that runs on push and PR to main. It performs:
 - Shellcheck on all bash scripts
@@ -102,10 +102,10 @@ The repository includes a GitHub Actions workflow at `.github/workflows/ci.yml` 
 - Python `py_compile` on all Python scripts
 - `docker compose config` on every stack to ensure they are valid
 
-## [HANDSHAKE] Contributing
+## Contributing
 
 Contributions are welcome! Open an issue or pull request. Please keep scripts in English and add a short header comment describing usage.
 
-## [SCROLL] License
+## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+MIT License — see (LICENSE) for details.
