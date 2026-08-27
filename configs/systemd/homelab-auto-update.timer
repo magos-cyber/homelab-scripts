@@ -1,0 +1,13 @@
+# Systemd Timer to Run Auto-Update Daily at 04:00 AM
+# Place in /etc/systemd/system/homelab-auto-update.timer
+
+[Unit]
+Description=Run Homelab Docker Auto-Update Daily
+
+[Timer]
+OnCalendar=*-*-* 04:00:00
+RandomizedDelaySec=15m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

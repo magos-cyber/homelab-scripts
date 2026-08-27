@@ -7,7 +7,7 @@ Complete toolkit for homelabing — best-practice scripts, Docker Compose stacks
 ```
 homelab-scripts/
 ├── scripts/
-│   ├── bash/           # Bash automation (server setup, docker, vpn, backup)
+│   ├── bash/           # Bash automation (server setup, docker, vpn, backup, security)
 │   ├── python/         # Python utilities (disk monitor, port scanner)
 │   └── monitoring/     # Monitoring & alerting (temp alert)
 ├── docker-compose/
@@ -18,7 +18,10 @@ homelab-scripts/
 ├── proxmox/
 │   ├── templates/      # LXC cloud-init templates
 │   └── backup/         # Backup automation scripts
-├── configs/            # nginx / systemd / security (coming soon)
+├── configs/
+│   ├── nginx/          # Reverse proxy examples
+│   ├── systemd/        # Service files & timers (auto-update)
+│   └── security/       # Baseline hardening scripts
 ├── .github/workflows/  # CI: shellcheck, yamllint, py-compile, compose validate (requires PAT with workflow scope)
 └── docs/               # Documentation
 ```
@@ -42,6 +45,7 @@ chmod +x scripts/bash/*.sh scripts/python/*.py proxmox/backup/*.sh
 - `scripts/bash/auto-update.sh` — Pull & recreate compose stacks, prune, health-check
 - `scripts/bash/vpn-setup.sh` — WireGuard server + `wg-add-client.sh` helper
 - `scripts/bash/backup-automator.sh` — Rotating tar.gz backups with optional Telegram notify
+- `scripts/bash/security-hardening.sh` — Apply baseline firewall (UFW) + Fail2Ban + sysctl hardening
 - `scripts/monitoring/temp-alert.sh` — CPU temperature alerts via Telegram (state-aware)
 
 ### Python Utilities
@@ -57,6 +61,11 @@ chmod +x scripts/bash/*.sh scripts/python/*.py proxmox/backup/*.sh
 ### Proxmox
 - `proxmox/templates/lxc-template.yml` — Documented LXC cloud-init template + `pct create` example
 - `proxmox/backup/backup-script.sh` — Automated VM/LXC `vzdump` with retention + Telegram
+
+### Configs
+- `configs/nginx/example_proxy.conf` — Example Nginx reverse proxy for Jellyfin, Grafana, Portainer, Uptime Kuma (SSL ready)
+- `configs/systemd/homelab-auto-update.service` — Systemd service to run the auto-update script
+- `configs/systemd/homelab-auto-update.timer` — Timer to trigger the service daily at 04:00
 
 ## ✅ CI
 

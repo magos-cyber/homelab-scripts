@@ -1,0 +1,20 @@
+# Example Systemd Service for Auto-Updating Docker Stacks
+# Place in /etc/systemd/system/homelab-auto-update.service
+# Companion timer: homelab-auto-update.timer
+
+[Unit]
+Description=Homelab Docker Auto-Update Service
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/homelab-scripts/scripts/bash/auto-update.sh
+# If you keep the repo elsewhere, adjust the path:
+# ExecStart=/home/youruser/homelab-scripts/scripts/bash/auto-update.sh
+# Run as a non-root user if you prefer (ensure they can run docker):
+# User=youruser
+# Group=youruser
+
+[Install]
+WantedBy=multi-user.target
