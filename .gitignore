@@ -1,0 +1,85 @@
+# ------------------------------------------------------------
+# homelab-scripts .gitignore – Production‑grade
+# ------------------------------------------------------------
+# General OS / editor artefacts
+.DS_Store
+Thumbs.db
+*~
+# backup files
+*.bak
+*.tmp
+*.swp
+# ------------------------------------------------------------
+# Python artefacts
+# Byte‑compiled / optimized / cache
+__pycache__/
+*.py[cod]
+*.pyo
+# C extensions
+*.so
+# Virtual environments (if any)
+venv/
+.env/
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+# ------------------------------------------------------------
+# Bash / shell artefacts
+# History files
+.*history
+# ------------------------------------------------------------
+# Environment / secret files
+# Common env files used for credentials
+.env
+.env.*
+.envrc
+# Files that may contain secrets – ignore any with these suffixes/patterns
+*.secret
+*.key
+*.pem
+*.crt
+*.pfx
+*.pub
+# Optional directory for manually‑managed secrets
+secrets/
+# ------------------------------------------------------------
+# Docker & container related artefacts
+# Docker Compose generated volumes / data directories
+volumes/
+**/volumes/**
+# Docker files that should not be versioned
+docker-compose.override.yml
+# Docker machine / swarm state
+.docker/
+# Docker build cache
+.dockerignore
+# ------------------------------------------------------------
+# Proxmox templates & VM images (large binary artefacts)
+*.qcow2
+*.raw
+*.vma
+*.vma.gz
+# ------------------------------------------------------------
+# Nginx / web server configuration
+# Exclude any files that may contain private keys or passwords
+nginx/conf.d/*.local
+nginx/conf.d/*.secret
+# ------------------------------------------------------------
+# Systemd service files – ignore any with embedded secrets
+*.service.secret
+# ------------------------------------------------------------
+# Documentation build artefacts (if generated)
+site/
+_build/
+# ------------------------------------------------------------
+# Miscellaneous
+# Log files
+*.log
+# Cache directories
+.cache/
+# Temporary files created by editors
+*#
+# ------------------------------------------------------------
+# End of file
