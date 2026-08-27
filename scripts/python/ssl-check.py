@@ -42,7 +42,7 @@ def main():
     failed = 0
     for domain in args.domains:
         result = check_ssl(domain)
-        status_icon = {"ok": "✓", "warning": "⚠", "expired": "✗", "error": "✗"}
+        status_icon = {"ok": "[OK]", "warning": "[WARNING]", "expired": "[FAIL]", "error": "[FAIL]"}
         icon = status_icon.get(result["status"], "?")
         
         if result["status"] == "ok":

@@ -52,11 +52,11 @@ def main():
                 "previous": previous_ips,
                 "current": current_ips
             })
-            print(f"⚠ {domain}: CHANGED")
+            print(f"[WARNING] {domain}: CHANGED")
             print(f"  Previous: {previous_ips}")
             print(f"  Current:  {current_ips}")
         else:
-            print(f"✓ {domain}: {current_ips}")
+            print(f"[OK] {domain}: {current_ips}")
         
         state[domain] = current_ips
     
@@ -64,7 +64,7 @@ def main():
     
     if changes:
         print(f"
-⚠ {len(changes)} DNS change(s) detected!")
+[WARNING] {len(changes)} DNS change(s) detected!")
         # Send alert if configured
         if os.getenv("TELEGRAM_BOT_TOKEN"):
             import urllib.request

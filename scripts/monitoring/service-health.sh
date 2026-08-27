@@ -13,14 +13,14 @@ echo ""
 
 for service in $SERVICES; do
     if systemctl is-active --quiet "$service" 2>/dev/null; then
-        echo "✓ $service: running"
+        echo "[OK] $service: running"
     else
-        echo "✗ $service: NOT running"
+        echo "[FAIL] $service: NOT running"
         FAILED=$((FAILED + 1))
         
         # Try to restart
         echo "  Attempting restart..."
-        sudo systemctl restart "$service" 2>/dev/null && echo "  ✓ Restarted" || echo "  ✗ Restart failed"
+        sudo systemctl restart "$service" 2>/dev/null && echo "  [OK] Restarted" || echo "  [FAIL] Restart failed"
     fi
 done
 
