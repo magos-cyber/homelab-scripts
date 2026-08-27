@@ -1,0 +1,32 @@
+# Home Assistant Stack with Mosquitto MQTT
+# Usage: cd home-assistant && docker compose up -d
+
+version: '3.8'
+
+services:
+  homeassistant:
+    image: ghcr.io/homeassistant/home-assistant:stable
+    container_name: homeassistant
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Athens
+    volumes:
+      - ./config:/config
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 8123:8123
+    # Optional: expose devices for USB/ZWave etc.
+    # devices:
+    #   - /dev/ttyUSB0:/dev/ttyUSB0
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: mosquitto
+    restart: unless-stopped
+    ports:
+      - 1883:1883
+      - 9001:9001  # websockets
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log

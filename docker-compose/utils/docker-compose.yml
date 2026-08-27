@@ -1,15 +1,41 @@
-# Monitoring Stack
-# Usage: cd monitoring && docker compose up -d
+# Utils Stack - Portainer, Vaultwarden, Homer
+# Usage: cd utils && docker compose up -d
 
 services:
-  uptime-kuma:
-    image: louislam/uptime-kuma:latest
-    container_name: uptime-kuma
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
     restart: unless-stopped
     environment:
-      - PUID=1000
-      - PGID=1000
+      - TZ=Europe/Athens
     volumes:
-      - ./config/uptime-kuma:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data:/data
     ports:
-      - 3001:3001
+      - 9000:9000
+
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Athens
+      - DOMAIN=https://vaultwarden.example.com  # CHANGE ME
+      - SIGNUPS_ALLOWED=true
+      - INVITATIONS_ALLOWED=true
+    volumes:
+      - ./vw-data:/data
+    ports:
+      - 8080:80
+
+  homer:
+    image: b4bz/homer:latest
+    container_name: homer
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Athens
+    volumes:
+      - ./assets:/www/assets
+      - ./config.yml:/www/config.yml:ro
+    ports:
+      - 8081:8080

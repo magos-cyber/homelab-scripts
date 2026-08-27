@@ -14,7 +14,8 @@ homelab-scripts/
 │   ├── media/          # Media servers (Jellyfin, Sonarr, Radarr)
 │   ├── monitoring/     # Prometheus, Grafana, Uptime Kuma, cAdvisor, node-exporter
 │   ├── network/        # Pi-hole, WireGuard
-│   └── utils/          # Portainer, Vaultwarden, Homer
+│   ├── utils/          # Portainer, Vaultwarden, Homer
+│   └── home-assistant/ # Home Assistant + Mosquitto MQTT
 ├── proxmox/
 │   ├── templates/      # LXC cloud-init templates
 │   └── backup/         # Backup automation scripts
@@ -46,6 +47,8 @@ chmod +x scripts/bash/*.sh scripts/python/*.py proxmox/backup/*.sh
 - `scripts/bash/vpn-setup.sh` — WireGuard server + `wg-add-client.sh` helper
 - `scripts/bash/backup-automator.sh` — Rotating tar.gz backups with optional Telegram notify
 - `scripts/bash/security-hardening.sh` — Apply baseline firewall (UFW) + Fail2Ban + sysctl hardening
+- `scripts/bash/hass-backup.sh` — Backup Home Assistant configuration (snapshot + rotation)
+- `scripts/bash/hass-update.sh` — Pull latest Home Assistant image and restart container
 - `scripts/monitoring/temp-alert.sh` — CPU temperature alerts via Telegram (state-aware)
 
 ### Python Utilities
@@ -56,7 +59,8 @@ chmod +x scripts/bash/*.sh scripts/python/*.py proxmox/backup/*.sh
 - `docker-compose/media/` — Jellyfin + *arr stack
 - `docker-compose/monitoring/` — Full Prometheus/Grafana/Uptime Kuma/cAdvisor/node-exporter stack with provisioning
 - `docker-compose/network/` — Pi-hole
-- `docker-compose/utils/` — Uptime Kuma
+- `docker-compose/utils/` — Portainer, Vaultwarden, Homer
+- `docker-compose/home-assistant/` — Home Assistant + Mosquitto MQTT stack
 
 ### Proxmox
 - `proxmox/templates/lxc-template.yml` — Documented LXC cloud-init template + `pct create` example
