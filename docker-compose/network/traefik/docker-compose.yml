@@ -1,0 +1,66 @@
+# Traefik Reverse Proxy Stack with Let's Encrypt
+# Usage: cd traefik && cp .env.example .env && docker compose up -d
+
+services:
+  traefik:
+    image: traefik:v3.1
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - TZ=Europe/Athens
+      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080  # Dashboard (disable in production or restrict access)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./config:/etc/traefik
+      - ./certs:/certs
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=true"  # Set to false in production, use basic auth middleware
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/certs/acme.json"
+      - "--certificatesresolvers.letsencrypt_staging.acme.dnschallenge=true"
+      - "--certificatesresolvers.letsencrypt_staging.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.letsencrypt_staging.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt_staging.acme.storage=/certs/acme-staging.json"
+      - "--certificatesresolvers.letsencrypt_staging.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--log.level=INFO"
+      - "--accesslog=true"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.${DOMAIN}`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.middlewares=auth@file"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+    networks:
+      - traefik-net
+
+  whoami:
+    image: traefik/whoami:latest
+    container_name: whoami
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.${DOMAIN}`)"
+      - "traefik.http.routers.whoami.tls.certresolver=letsencrypt"
+      - "traefik.http.services.whoami.loadbalancer.server.port=80"
+    networks:
+      - traefik-net
+
+networks:
+  traefik-net:
+    name: traefik-net
+    driver: bridge

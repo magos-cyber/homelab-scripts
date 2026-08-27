@@ -11,11 +11,14 @@ homelab-scripts/
 │   ├── python/         # Python utilities (disk monitor, port scanner)
 │   └── monitoring/     # Monitoring & alerting (temp alert)
 ├── docker-compose/
-│   ├── media/          # Media servers (Jellyfin, Sonarr, Radarr)
+│   ├── media/          # Jellyfin, *arr, Immich, Navidrome
 │   ├── monitoring/     # Prometheus, Grafana, Uptime Kuma, cAdvisor, node-exporter
-│   ├── network/        # Pi-hole, WireGuard
-│   ├── utils/          # Portainer, Vaultwarden, Homer
-│   └── home-assistant/ # Home Assistant + Mosquitto MQTT
+│   ├── network/        # Pi-hole, Traefik, AdGuard+Unbound
+│   ├── utils/          # Portainer, Vaultwarden, Homer, Watchtower, Dozzle, IT-Tools, Stirling PDF
+│   ├── home-assistant/ # Home Assistant + Mosquitto MQTT
+│   ├── productivity/   # Nextcloud, Paperless-ngx, Gitea
+│   ├── auth/           # Authentik identity server
+│   └── databases/      # MariaDB, PostgreSQL, Redis shared stack
 ├── proxmox/
 │   ├── templates/      # LXC cloud-init templates
 │   └── backup/         # Backup automation scripts
@@ -23,7 +26,7 @@ homelab-scripts/
 │   ├── nginx/          # Reverse proxy examples
 │   ├── systemd/        # Service files & timers (auto-update)
 │   └── security/       # Baseline hardening scripts
-├── .github/workflows/  # CI: shellcheck, yamllint, py-compile, compose validate (requires PAT with workflow scope)
+├── .github/workflows/  # CI: shellcheck, yamllint, py-compile, compose validate
 └── docs/               # Documentation
 ```
 
@@ -55,12 +58,32 @@ chmod +x scripts/bash/*.sh scripts/python/*.py proxmox/backup/*.sh
 - `scripts/python/disk-monitor.py` — Disk usage monitor with warning/critical thresholds + Telegram
 - `scripts/python/port-scanner.py` — Multi-host TCP port scanner (common homelab ports)
 
-### Docker Compose
-- `docker-compose/media/` — Jellyfin + *arr stack
-- `docker-compose/monitoring/` — Full Prometheus/Grafana/Uptime Kuma/cAdvisor/node-exporter stack with provisioning
-- `docker-compose/network/` — Pi-hole
+### Docker Compose — Media
+- `docker-compose/media/` — Jellyfin + *arr (Sonarr/Radarr) stack
+- `docker-compose/media/immich/` — Immich photo management (PostgreSQL 15 + Redis + ML)
+- `docker-compose/media/navidrome/` — Navidrome music streaming (Subsonic-compatible)
+
+### Docker Compose — Monitoring
+- `docker-compose/monitoring/` — Full Prometheus/Grafana/Uptime Kuma/cAdvisor/node-exporter stack with provisioning, dashboards, and alert rules
+
+### Docker Compose — Network
+- `docker-compose/network/` — Pi-hole DNS ad-blocker
+- `docker-compose/network/traefik/` — Traefik v3 reverse proxy with Let's Encrypt (Cloudflare DNS-01), security headers, dashboard
+- `docker-compose/network/dns/` — AdGuard Home + Unbound (DNS-over-TLS to Cloudflare/Quad9, DNSSEC)
+
+### Docker Compose — Productivity
+- `docker-compose/productivity/nextcloud/` — Nextcloud (PostgreSQL 15 + Redis + Cron)
+- `docker-compose/productivity/paperless-ngx/` — Paperless-ngx document management (PostgreSQL + Redis + Gotenberg + Tika)
+- `docker-compose/productivity/gitea/` — Gitea self-hosted Git (PostgreSQL 16, SSH on 2222)
+
+### Docker Compose — Auth & IoT
+- `docker-compose/auth/authentik/` — Authentik identity/authentication server (PostgreSQL + Redis, server + worker)
+- `docker-compose/home-assistant/` — Home Assistant + Mosquitto MQTT
+
+### Docker Compose — Utils & Databases
 - `docker-compose/utils/` — Portainer, Vaultwarden, Homer
-- `docker-compose/home-assistant/` — Home Assistant + Mosquitto MQTT stack
+- `docker-compose/utils/utility.yml` — Watchtower (auto-update), Dozzle (logs), IT-Tools, Stirling PDF
+- `docker-compose/databases/` — Shared MariaDB + PostgreSQL + Redis stack
 
 ### Proxmox
 - `proxmox/templates/lxc-template.yml` — Documented LXC cloud-init template + `pct create` example
@@ -78,8 +101,6 @@ The repository includes a GitHub Actions workflow at `.github/workflows/ci.yml` 
 - YAML validation on all compose files
 - Python `py_compile` on all Python scripts
 - `docker compose config` on every stack to ensure they are valid
-
-**Note:** To enable this workflow, you need a Personal Access Token with the `workflow` scope. If your PAT does not have this scope, the workflow will not be created/updateable. You can still use all other features of the repo.
 
 ## 🤝 Contributing
 

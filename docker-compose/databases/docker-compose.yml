@@ -1,0 +1,76 @@
+# Database Stack - MariaDB, PostgreSQL, Redis
+# Usage: cd databases && docker compose up -d
+#
+# Shared database stack for homelab services.
+# Copy .env.example to .env and adjust values before starting.
+
+services:
+  mariadb:
+    image: mariadb:11
+    container_name: mariadb
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Athens
+      - MYSQL_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MARIADB_DATABASE:-homelab}
+      - MYSQL_USER=${MARIADB_USER:-homelab}
+      - MYSQL_PASSWORD=${MARIADB_PASSWORD}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    ports:
+      - "${MARIADB_PORT:-3306}:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  postgres:
+    image: postgres:17
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Athens
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_USER=${POSTGRES_USER:-homelab}
+      - POSTGRES_DB=${POSTGRES_DB:-homelab}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-homelab} -d ${POSTGRES_DB:-homelab}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Athens
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
+      --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  mariadb_data:
+    name: mariadb_data
+  postgres_data:
+    name: postgres_data
+  redis_data:
+    name: redis_data

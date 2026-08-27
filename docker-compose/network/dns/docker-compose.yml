@@ -1,0 +1,35 @@
+# AdGuard Home + Unbound DNS Stack
+# Usage: cd dns && cp .env.example .env && docker compose up -d
+# AdGuard Home web UI: http://<host>:3000 (first-run setup wizard)
+# Unbound runs as AdGuard Home's upstream resolver on 127.0.0.1:5353
+
+services:
+  adguard:
+    image: adguard/adguard-home:latest
+    container_name: adguard
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+    ports:
+      - "3000:3000"   # AdGuard Home web UI (first-run setup)
+      - "53:53/tcp"   # DNS over TCP
+      - "53:53/udp"   # DNS over UDP
+    volumes:
+      - ./config/adguard/work:/opt/adguardhome/work
+      - ./config/adguard/conf:/opt/adguardhome/conf
+    # After first-run setup, set AdGuard Home → DNS Settings → Upstream DNS servers:
+    #   http://127.0.0.1:5353/dns-query   (or 127.0.0.1:5353)
+
+  unbound:
+    image: mvysokov/unbound:latest
+    container_name: unbound
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ./config/unbound:/etc/unbound
+    ports:
+      - "127.0.0.1:5353:5353/tcp"
+      - "127.0.0.1:5353:5353/udp"
+    # Unbound forwards to Cloudflare (1.1.1.1) and Quad9 (9.9.9.9) over
+    # DNS-over-TLS and DNS-over-HTTPS (see ./config/unbound/unbound.conf)

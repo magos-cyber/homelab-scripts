@@ -1,0 +1,27 @@
+# Navidrome - Self-hosted music streaming server (Subsonic-compatible API)
+# Usage: cd media/navidrome && cp .env.example .env && docker compose up -d
+services:
+  navidrome:
+    image: deluan/navidrome:latest
+    container_name: navidrome
+    restart: unless-stopped
+    environment:
+      - ND_MUSICFOLDER=/music
+      - ND_CONFIGFOLDER=/data
+      - ND_LOGLEVEL=info
+      - ND_SCANSCHEDULE=1h
+      - ND_PORT=4533
+      # Optional: Spotify (for artist bios, cover art, and playlist import)
+      - ND_SPOTIFY_ID=${ND_SPOTIFY_ID}
+      - ND_SPOTIFY_SECRET=${ND_SPOTIFY_SECRET}
+      # Optional: Last.fm (scrobbling)
+      - ND_LASTFM_APIKEY=${ND_LASTFM_APIKEY}
+      - ND_LASTFM_SECRET=${ND_LASTFM_SECRET}
+      # Optional: set a public URL for remote access, e.g. https://music.example.com
+      - ND_BASEURL=${ND_BASEURL}
+    ports:
+      - 4533:4533
+    volumes:
+      - ./config:/data
+      - ./music:/music:ro
+    user: 1000:1000

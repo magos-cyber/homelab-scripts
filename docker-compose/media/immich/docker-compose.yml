@@ -1,0 +1,63 @@
+services:
+  immich-server:
+    container_name: immich-server
+    image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
+    command: ['start.sh', 'immich']
+    ports:
+      - "2283:3001"
+    volumes:
+      - ${UPLOAD_LOCATION}:/usr/src/app/upload
+      - /etc/localtime:/etc/localtime:ro
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - database
+    restart: always
+    networks:
+      - immich-network
+
+  immich-machine-learning:
+    container_name: immich-machine-learning
+    image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
+    volumes:
+      - model-cache:/cache
+    env_file:
+      - .env
+    restart: always
+    networks:
+      - immich-network
+
+  redis:
+    container_name: immich-redis
+    image: docker.io/library/redis:7-alpine
+    healthcheck:
+      test: redis-cli ping || exit 1
+    restart: always
+    networks:
+      - immich-network
+
+  database:
+    container_name: immich-postgres
+    image: docker.io/tensorchord/pgvecto-rs:pg15-v0.2.0
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_DB: ${DB_DATABASE_NAME}
+      POSTGRES_INITDB_ARGS: '--data-checksums'
+    volumes:
+      - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready --dbname='${DB_DATABASE_NAME}' --username='${DB_USERNAME}' || exit 1; Chk=$$(psql --dbname='${DB_DATABASE_NAME}' --username='${DB_USERNAME}' --tuples-only --no-align --command='SELECT pg_database_checkpoint_checkpoint_wal_size FROM pg_stat_bgwriter'); echo "checkpoint_wal_size=$${Chk}"; [ $${Chk} -lt '500MB' ];
+      interval: 5m
+      start_interval: 30s
+      start_period: 5m
+    restart: always
+    networks:
+      - immich-network
+
+volumes:
+  model-cache:
+
+networks:
+  immich-network:

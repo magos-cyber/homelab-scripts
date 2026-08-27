@@ -1,0 +1,127 @@
+# Authentik Identity & Authentication Stack
+# Usage: cd authentik && cp .env.example .env && docker compose up -d
+#
+# Services:
+#   - authentik-server  : web UI & API (port 9000)
+#   - authentik-worker  : background worker (same image, different command)
+#   - postgres          : database
+#   - redis             : caching & Celery broker
+#
+# Web access:  http://localhost:9000
+# HTTPS access:  https://localhost:9443
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: authentik-postgres
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Athens
+      - POSTGRES_DB=${AUTHENTIK_POSTGRES_NAME}
+      - POSTGRES_USER=${AUTHENTIK_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${AUTHENTIK_POSTGRES_PASSWORD}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${AUTHENTIK_POSTGRES_USER} -d ${AUTHENTIK_POSTGRES_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    container_name: authentik-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --requirepass ${AUTHENTIK_REDIS_PASSWORD:-}
+      --appendonly yes
+      --save 60 1
+    volumes:
+      - ./data/redis:/data
+    environment:
+      - TZ=Europe/Athens
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  authentik-server:
+    image: authentik/server:latest
+    container_name: authentik-server
+    restart: unless-stopped
+    command: server
+    ports:
+      - "${AUTHENTIK_SERVER_PORT:-9000}:9000"
+      - "${AUTHENTIK_SERVER_PORT_HTTPS:-9443}:9443"
+    environment:
+      - TZ=Europe/Athens
+      - AUTHENTIK_SECRET_KEY=${AUTHENTIK_SECRET_KEY}
+      - AUTHENTIK_LOG_LEVEL=${AUTHENTIK_LOG_LEVEL:-info}
+      - AUTHENTIK_SERVER_PORT=9000
+      - AUTHENTIK_SERVER_PORT_HTTPS=9443
+      - AUTHENTIK_POSTGRES_NAME=${AUTHENTIK_POSTGRES_NAME}
+      - AUTHENTIK_POSTGRES_USER=${AUTHENTIK_POSTGRES_USER}
+      - AUTHENTIK_POSTGRES_PASSWORD=${AUTHENTIK_POSTGRES_PASSWORD}
+      - AUTHENTIK_POSTGRES_HOST=${AUTHENTIK_POSTGRES_HOST}
+      - AUTHENTIK_POSTGRES_PORT=${AUTHENTIK_POSTGRES_PORT}
+      - AUTHENTIK_REDIS_HOST=${AUTHENTIK_REDIS_HOST}
+      - AUTHENTIK_REDIS_PORT=${AUTHENTIK_REDIS_PORT}
+      - AUTHENTIK_REDIS_PASSWORD=${AUTHENTIK_REDIS_PASSWORD:-}
+    volumes:
+      - ./data/media:/media
+      - ./data/certs:/certs
+      - ./data/templates:/templates
+      - ./data/logs:/var/log/authentik
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/-/health/live/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  authentik-worker:
+    image: authentik/server:latest
+    container_name: authentik-worker
+    restart: unless-stopped
+    command: worker
+    environment:
+      - TZ=Europe/Athens
+      - AUTHENTIK_SECRET_KEY=${AUTHENTIK_SECRET_KEY}
+      - AUTHENTIK_LOG_LEVEL=${AUTHENTIK_LOG_LEVEL:-info}
+      - AUTHENTIK_POSTGRES_NAME=${AUTHENTIK_POSTGRES_NAME}
+      - AUTHENTIK_POSTGRES_USER=${AUTHENTIK_POSTGRES_USER}
+      - AUTHENTIK_POSTGRES_PASSWORD=${AUTHENTIK_POSTGRES_PASSWORD}
+      - AUTHENTIK_POSTGRES_HOST=${AUTHENTIK_POSTGRES_HOST}
+      - AUTHENTIK_POSTGRES_PORT=${AUTHENTIK_POSTGRES_PORT}
+      - AUTHENTIK_REDIS_HOST=${AUTHENTIK_REDIS_HOST}
+      - AUTHENTIK_REDIS_PORT=${AUTHENTIK_REDIS_PORT}
+      - AUTHENTIK_REDIS_PASSWORD=${AUTHENTIK_REDIS_PASSWORD:-}
+    volumes:
+      - ./data/media:/media
+      - ./data/certs:/certs
+      - ./data/templates:/templates
+      - ./data/logs:/var/log/authentik
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f 'authentik.*worker' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+networks:
+  default:
+    name: authentik

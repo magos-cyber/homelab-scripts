@@ -1,0 +1,88 @@
+# Nextcloud Stack with PostgreSQL, Redis, and Cron
+# Usage: cd nextcloud && cp .env.example .env && docker compose up -d
+
+services:
+  nextcloud:
+    image: nextcloud:latest
+    container_name: nextcloud
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Athens
+      - POSTGRES_HOST=nextcloud-db
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_ADMIN_USER}
+      - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD}
+      - NEXTCLOUD_TRUSTED_DOMAINS=${NEXTCLOUD_TRUSTED_DOMAINS}
+      - REDIS_HOST=nextcloud-redis
+      - OVERWRITEPROTOCOL=https
+      - OVERWRITEHOST=${NEXTCLOUD_DOMAIN}
+    volumes:
+      - ./data:/var/www/html
+      - ./config:/var/www/html/config
+      - ./custom_apps:/var/www/html/custom_apps
+    ports:
+      - ${NEXTCLOUD_PORT}:80
+    depends_on:
+      nextcloud-db:
+        condition: service_healthy
+      nextcloud-redis:
+        condition: service_healthy
+    networks:
+      - nextcloud-net
+
+  nextcloud-db:
+    image: postgres:15-alpine
+    container_name: nextcloud-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - nextcloud-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nextcloud-net
+
+  nextcloud-redis:
+    image: redis:7-alpine
+    container_name: nextcloud-redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nextcloud-net
+
+  nextcloud-cron:
+    image: nextcloud:latest
+    container_name: nextcloud-cron
+    restart: unless-stopped
+    volumes:
+      - ./data:/var/www/html
+      - ./config:/var/www/html/config
+    entrypoint: /cron.sh
+    depends_on:
+      nextcloud-db:
+        condition: service_healthy
+      nextcloud-redis:
+        condition: service_healthy
+    networks:
+      - nextcloud-net
+
+volumes:
+  nextcloud-db-data:
+    name: nextcloud-db-data
+
+networks:
+  nextcloud-net:
+    name: nextcloud-net
+    driver: bridge
