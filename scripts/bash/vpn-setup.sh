@@ -30,7 +30,6 @@ SERVER_PRIV=$(cat server_private.key)
 SERVER_PUB=$(cat server_public.key)
 
 # Pick a subnet
-WG_NET="10.10.0.0/24"
 SERVER_IP="10.10.0.1"
 
 # Build server config

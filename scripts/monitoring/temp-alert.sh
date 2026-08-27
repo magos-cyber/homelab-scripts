@@ -33,7 +33,8 @@ get_cpu_temp() {
 # Send Telegram alert
 send_alert() {
     local temp=$1
-    local message="🌡️ <b>High CPU Temperature!</b>
+    local message
+    message="🌡️ <b>High CPU Temperature!</b>
     
 Temperature: <b>${temp}°C</b>
 Threshold: ${TEMP_THRESHOLD}°C
@@ -51,7 +52,8 @@ Time: $(date '+%Y-%m-%d %H:%M:%S')
 # Send recovery notification
 send_recovery() {
     local temp=$1
-    local message="✅ <b>Temperature Normal</b>
+    local message
+    message="✅ <b>Temperature Normal</b>
     
 Temperature: <b>${temp}°C</b>
 Server: $(hostname)

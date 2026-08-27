@@ -23,7 +23,11 @@ TS=$(date '+%Y%m%d-%H%M%S')
 ARCHIVE="$BACKUP_DIR/${PREFIX}-${TS}.tar.gz"
 
 log "Starting backup -> $ARCHIVE"
-tar -czf "$ARCHIVE" "${SRC_DIRS[@]}" 2>/dev/null && log "Archive created ($(du -h "$ARCHIVE" | cut -f1))" || warn "tar finished with warnings"
+if tar -czf "$ARCHIVE" "${SRC_DIRS[@]}" 2>/dev/null; then
+    log "Archive created ($(du -h "$ARCHIVE" | cut -f1))"
+else
+    warn "tar finished with warnings"
+fi
 
 # Rotation
 DELETED=$(find "$BACKUP_DIR" -name "${PREFIX}-*.tar.gz" -mtime +"$RETENTION_DAYS" -delete -print 2>/dev/null | wc -l)

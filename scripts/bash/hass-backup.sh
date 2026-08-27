@@ -33,7 +33,11 @@ fi
 ARCHIVE="$BACKUP_DIR/${SNAPSHOT_NAME}.tar.gz"
 
 log "Starting Home Assistant backup -> $ARCHIVE"
-tar -czf "$ARCHIVE" -C "$HA_CONFIG" . 2>/dev/null && log "Backup created ($(du -h "$ARCHIVE" | cut -f1))" || warn "Backup finished with warnings"
+if tar -czf "$ARCHIVE" -C "$HA_CONFIG" . 2>/dev/null; then
+    log "Backup created ($(du -h "$ARCHIVE" | cut -f1))"
+else
+    warn "Backup finished with warnings"
+fi
 
 # Rotation
 DELETED=$(find "$BACKUP_DIR" -name "ha-backup-*.tar.gz" -mtime +"$RETENTION_DAYS" -delete -print 2>/dev/null | wc -l)

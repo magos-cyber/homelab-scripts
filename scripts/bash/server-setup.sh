@@ -51,13 +51,13 @@ log "Setting timezone to Europe/Athens..."
 timedatectl set-timezone Europe/Athens
 
 # 4. Set hostname
-read -p "Enter hostname for the server (e.g. homelab-node1): " HOSTNAME
+read -rp "Enter hostname for the server (e.g. homelab-node1): " HOSTNAME
 hostnamectl set-hostname "$HOSTNAME"
 echo "127.0.0.1 $HOSTNAME" >> /etc/hosts
 log "Hostname set: $HOSTNAME"
 
 # 5. Create non-root user
-read -p "Enter username for new user (e.g. admin): " USERNAME
+read -rp "Enter username for new user (e.g. admin): " USERNAME
 if id "$USERNAME" &>/dev/null; then
     warn "User $USERNAME already exists, skipping..."
 else
