@@ -63,6 +63,10 @@ jobs:
 
       - name: Docker Compose validation
         run: |
-          for f in $(find docker-compose -name "docker-compose.yml"); do
-            docker compose -f "$f" config >/dev/null 2>&1 && echo "✓ $f valid" || (echo "✗ $f invalid"; exit 1)
-          done
+          if command -v docker &>/dev/null; then
+            for f in $(find docker-compose -name "docker-compose.yml"); do
+              docker compose -f "$f" config >/dev/null 2>&1 && echo "✓ $f valid" || (echo "✗ $f invalid"; exit 1)
+            done
+          else
+            echo "Docker not available, skipping compose validation"
+          fi
